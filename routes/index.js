@@ -18,7 +18,7 @@ const headers3 = {
 router.get("/", function (req, res, next) {
   axios
     .get("https://api.coinranking.com/v2/coins?limit=100&timePeriod=24h", {
-      headers3,
+      headers,
     })
     .then((e) => {
       res.json(e.data);
@@ -47,7 +47,7 @@ router.get("/coin/:id", function (req, res, next) {
   console.log(id);
   try {
     axios
-      .get("https://api.coinranking.com/v2/coin/" + id, { headers3 })
+      .get("https://api.coinranking.com/v2/coin/" + id, { headers })
       .then((e) => {
         const infor = e.data;
         resultfinal.infor = e.data;
