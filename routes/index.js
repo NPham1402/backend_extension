@@ -28,7 +28,7 @@ router.get("/", function (req, res, next) {
       res.json(e.data);
     });
 });
-router.get("/news", function (req, res, next) {
+router.get("/news", function (req, res) {
   axios
     .get(
       "https://cryptopanic.com/api/v1/posts/?auth_token=43382aa9b285b15dc486b21e510501bf14c69b1e"
