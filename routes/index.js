@@ -18,9 +18,13 @@ const headers3 = {
 router.get("/", function (req, res, next) {
   axios
     .get("https://api.coinranking.com/v2/coins?limit=100&timePeriod=24h", {
-      headers,
+      headers: {
+        "x-access-token":
+          "coinranking15e62b930c47b275f6645ea9c85c13dc88f9947ac92049a3",
+      },
     })
     .then((e) => {
+      console.log(e);
       res.json(e.data);
     });
 });
@@ -31,7 +35,6 @@ router.get("/news", function (req, res, next) {
     )
     .then((e) => {
       try {
-        console.log(e.status);
         res.json(e.data);
       } catch (error) {
         console.log(error);
@@ -47,7 +50,12 @@ router.get("/coin/:id", function (req, res, next) {
   console.log(id);
   try {
     axios
-      .get("https://api.coinranking.com/v2/coin/" + id, { headers })
+      .get("https://api.coinranking.com/v2/coin/" + id, {
+        headers: {
+          "x-access-token":
+            "coinranking4dca18b4fc6f95ee35cd4f07e36fb500f0c6aa66e1972d1f",
+        },
+      })
       .then((e) => {
         const infor = e.data;
         resultfinal.infor = e.data;
@@ -56,7 +64,12 @@ router.get("/coin/:id", function (req, res, next) {
             " https://api.coinranking.com/v2/coin/" +
               id +
               "/history?timePeriod=all",
-            { headers }
+            {
+              headers: {
+                "x-access-token":
+                  "coinrankingecab11b9d919a740887a9989e83b86b90d86c7236f5d56b5",
+              },
+            }
           )
           .then((es) => {
             const infor2 = es.data;
