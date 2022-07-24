@@ -44,9 +44,8 @@ router.get("/coin/:id", function (req, res) {
   const id = req.params.id;
   const resultfinal = {
     infor: {},
-    chart: [],
+    chart: {},
   };
-  const timestamp = [];
   const result = {
     data: [],
   };
@@ -73,13 +72,13 @@ router.get("/coin/:id", function (req, res) {
     .then(
       axios.spread((data1, data2) => {
         resultfinal.infor = data1.data;
-
         data2.data.data.history.forEach((element) => {
-          resultfinal.chart.push([
+          result.data.push([
             element.timestamp * 1000,
             parseFloat(element.price).toFixed(2),
           ]);
         });
+        resultfinal.chart = result;
         res.json(resultfinal);
       })
     );
