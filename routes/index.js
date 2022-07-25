@@ -75,6 +75,7 @@ router.get("/coin/:id", function (req, res) {
   const resultfinal = {
     infor: {},
     chart: {},
+    news: {},
   };
   const result = {
     data: [],
@@ -99,9 +100,13 @@ router.get("/coin/:id", function (req, res) {
           },
         }
       ),
+      axios.get(
+        "https://cryptopanic.com/api/v1/posts/?auth_token=f64c65903be4071cde0759ad80e39a43be78e94d&currencies=" +
+          req.headers.id
+      ),
     ])
     .then(
-      axios.spread((data1, data2) => {
+      axios.spread((data1, data2, data3) => {
         resultfinal.infor = data1.data;
         data2.data.data.history.forEach((element) => {
           if (element.price == null) {
@@ -116,6 +121,7 @@ router.get("/coin/:id", function (req, res) {
         });
         result.mindate = Math.min(...timestamp);
         resultfinal.chart = result;
+        resultfinal.news = data3.data;
         res.json(resultfinal);
       })
     );
