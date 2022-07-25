@@ -16,29 +16,37 @@ const headers3 = {
 };
 /* GET home page. */
 router.get("/", function (req, res, next) {
-  axios
-    .get("https://api.coinranking.com/v2/coins?limit=100&timePeriod=24h", {
-      headers: {
-        "x-access-token":
-          "coinranking15e62b930c47b275f6645ea9c85c13dc88f9947ac92049a3",
-      },
-    })
-    .then((e) => {
-      res.json(e.data);
-    });
+  try {
+    axios
+      .get("https://api.coinranking.com/v2/coins?limit=100&timePeriod=24h", {
+        headers: {
+          "x-access-token":
+            "coinranking15e62b930c47b275f6645ea9c85c13dc88f9947ac92049a3",
+        },
+      })
+      .then((e) => {
+        res.json(e.data);
+      });
+  } catch (error) {
+    console.log(error);
+  }
 });
 router.get("/news", function (req, res) {
-  axios
-    .get(
-      "https://cryptopanic.com/api/v1/posts/?auth_token=43382aa9b285b15dc486b21e510501bf14c69b1e"
-    )
-    .then((e) => {
-      try {
-        res.json(e.data);
-      } catch (error) {
-        console.log(error);
-      }
-    });
+  try {
+    axios
+      .get(
+        "https://cryptopanic.com/api/v1/posts/?auth_token=43382aa9b285b15dc486b21e510501bf14c69b1e"
+      )
+      .then((e) => {
+        try {
+          res.json(e.data);
+        } catch (error) {
+          console.log(error);
+        }
+      });
+  } catch (error) {
+    console.log(error);
+  }
 });
 router.get("/likecoin", function (req, res) {
   console.log([].concat(...req.headers.map((doc) => doc.data)));
@@ -54,19 +62,6 @@ router.get("/likecoin", function (req, res) {
   //       console.log(error);
   //     }
   //   });
-});
-router.get("/news", function (req, res) {
-  axios
-    .get(
-      "https://cryptopanic.com/api/v1/posts/?auth_token=43382aa9b285b15dc486b21e510501bf14c69b1e"
-    )
-    .then((e) => {
-      try {
-        res.json(e.data);
-      } catch (error) {
-        console.log(error);
-      }
-    });
 });
 router.get("/coin/:id", function (req, res) {
   const id = req.params.id;
