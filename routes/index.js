@@ -81,50 +81,54 @@ router.get("/coin/:id", function (req, res) {
     data: [],
     mindate: 0,
   };
-  axios
-    .all([
-      axios.get("https://api.coinranking.com/v2/coin/" + id, {
-        headers: {
-          "x-access-token":
-            "coinranking4dca18b4fc6f95ee35cd4f07e36fb500f0c6aa66e1972d1f",
-        },
-      }),
-      axios.get(
-        " https://api.coinranking.com/v2/coin/" +
-          id +
-          "/history?timePeriod=all",
-        {
+  try {
+    axios
+      .all([
+        axios.get("https://api.coinranking.com/v2/coin/" + id, {
           headers: {
             "x-access-token":
-              "coinrankingecab11b9d919a740887a9989e83b86b90d86c7236f5d56b5",
+              "coinranking4dca18b4fc6f95ee35cd4f07e36fb500f0c6aa66e1972d1f",
           },
-        }
-      ),
-      axios.get(
-        "https://cryptopanic.com/api/v1/posts/?auth_token=f64c65903be4071cde0759ad80e39a43be78e94d&currencies=" +
-          req.headers.id
-      ),
-    ])
-    .then(
-      axios.spread((data1, data2, data3) => {
-        resultfinal.infor = data1.data;
-        data2.data.data.history.forEach((element) => {
-          if (element.price == null) {
-            console.log("err");
-          } else {
-            timestamp.push(element.timestamp);
-            result.data.push([
-              element.timestamp * 1000,
-              parseFloat(element.price).toFixed(2),
-            ]);
+        }),
+        axios.get(
+          " https://api.coinranking.com/v2/coin/" +
+            id +
+            "/history?timePeriod=all",
+          {
+            headers: {
+              "x-access-token":
+                "coinrankingecab11b9d919a740887a9989e83b86b90d86c7236f5d56b5",
+            },
           }
-        });
-        result.mindate = Math.min(...timestamp);
-        resultfinal.chart = result;
-        resultfinal.news = data3.data;
-        res.json(resultfinal);
-      })
-    );
+        ),
+        axios.get(
+          "https://cryptopanic.com/api/v1/posts/?auth_token=f64c65903be4071cde0759ad80e39a43be78e94d&currencies=" +
+            req.headers.id
+        ),
+      ])
+      .then(
+        axios.spread((data1, data2, data3) => {
+          resultfinal.infor = data1.data;
+          data2.data.data.history.forEach((element) => {
+            if (element.price == null) {
+              console.log("err");
+            } else {
+              timestamp.push(element.timestamp);
+              result.data.push([
+                element.timestamp * 1000,
+                parseFloat(element.price).toFixed(2),
+              ]);
+            }
+          });
+          result.mindate = Math.min(...timestamp);
+          resultfinal.chart = result;
+          resultfinal.news = data3.data;
+          res.json(resultfinal);
+        })
+      );
+  } catch (error) {
+    console.log(err);
+  }
 });
 // router.get("/coin/:id", function (req, res, next) {
 //   const id = req.params.id;
