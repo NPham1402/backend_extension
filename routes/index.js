@@ -1,6 +1,6 @@
 const { default: axios } = require("axios");
 var express = require("express");
-
+const fs = require("fs");
 var router = express.Router();
 const headers = {
   "x-access-token":
@@ -15,54 +15,65 @@ const headers3 = {
     "coinrankingecab11b9d919a740887a9989e83b86b90d86c7236f5d56b5",
 };
 /* GET home page. */
-router.get("/", function (req, res, next) {
-  try {
-    axios
-      .get("https://api.coinranking.com/v2/coins?limit=100&timePeriod=24h", {
-        headers: {
-          "x-access-token":
-            "coinranking15e62b930c47b275f6645ea9c85c13dc88f9947ac92049a3",
-        },
+setInterval(() => {
+  axios
+    .all([
+      axios.get(
+        "https://api.coinranking.com/v2/coins?limit=100&timePeriod=24h",
+        {
+          headers: {
+            "x-access-token":
+              "coinranking15e62b930c47b275f6645ea9c85c13dc88f9947ac92049a3",
+          },
+        }
+      ),
+      axios.get(
+        "https://cryptopanic.com/api/v1/posts/?auth_token=43382aa9b285b15dc486b21e510501bf14c69b1e"
+      ),
+    ])
+    .then(
+      axios.spread((coin, news) => {
+        fs.writeFileSync("Data_list_coin.json", JSON.stringify(coin.data));
+        fs.writeFileSync("Data_new.json", JSON.stringify(news.data));
       })
-      .then((e) => {
-        res.json(e.data);
-      });
-  } catch (error) {
-    console.log(error);
-  }
+    );
+  // .then((e) => {
+  //   console.log("run");
+  //   fs.writeFileSync("Data_list_coin.json", JSON.stringify(e.data));
+  // })
+  // .catch((err) => {
+  //   console.log(err);
+  // });
+}, 2 * 60 * 60 * 1000);
+router.get("/", function (req, res, next) {
+  fs.readFile("Data_list_coin.json", "utf8", function (err, data) {
+    if (err) throw err;
+    obj = JSON.parse(data);
+    res.json(obj);
+  });
 });
 router.get("/news", function (req, res) {
-  try {
-    axios
-      .get(
-        "https://cryptopanic.com/api/v1/posts/?auth_token=43382aa9b285b15dc486b21e510501bf14c69b1e"
-      )
-      .then((e) => {
-        try {
-          res.json(e.data);
-        } catch (error) {
-          console.log(error);
-        }
-      });
-  } catch (error) {
-    console.log(error);
-  }
+  fs.readFile("Data_new.json", "utf8", function (err, data) {
+    if (err) throw err;
+    obj = JSON.parse(data);
+    res.json(obj);
+  });
 });
-router.get("/likecoin", function (req, res) {
-  console.log([].concat(...req.headers.map((doc) => doc.data)));
+// router.get("/likecoin", function (req, res) {
+//   console.log([].concat(...req.headers.map((doc) => doc.data)));
 
-  // axios
-  //   .get(
-  //     "https://cryptopanic.com/api/v1/posts/?auth_token=43382aa9b285b15dc486b21e510501bf14c69b1e"
-  //   )
-  //   .then((e) => {
-  //     try {
-  //       res.json(e.data);
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   });
-});
+//   // axios
+//   //   .get(
+//   //     "https://cryptopanic.com/api/v1/posts/?auth_token=43382aa9b285b15dc486b21e510501bf14c69b1e"
+//   //   )
+//   //   .then((e) => {
+//   //     try {
+//   //       res.json(e.data);
+//   //     } catch (error) {
+//   //       console.log(error);
+//   //     }
+//   //   });
+// });
 router.get("/coin/:id", function (req, res) {
   const id = req.params.id;
   const timestamp = [];
