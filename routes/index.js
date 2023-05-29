@@ -59,6 +59,20 @@ router.get("/news", function (req, res) {
     res.json(obj);
   });
 });
+
+router.get("/callspamblocker/news", function (req, res) {
+  axios
+    .get(
+      "https://newsapi.org/v2/everything?q=spam-phone&apiKey=3a2b177358fd4577b507c7923486b29f",
+      {
+        headers: { authorization: "spambl0ckerAuthorization2k1rbyp0wer" },
+      }
+    )
+    .then((data) => {
+      res.json(data.data.articles);
+    });
+});
+
 // router.get("/likecoin", function (req, res) {
 //   console.log([].concat(...req.headers.map((doc) => doc.data)));
 
