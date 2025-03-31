@@ -1,57 +1,93 @@
 const { default: axios } = require("axios");
+const { kMaxLength } = require("buffer");
 var express = require("express");
 const fs = require("fs");
+
 var router = express.Router();
-const headers = {
-  "x-access-token":
-    "coinranking4dca18b4fc6f95ee35cd4f07e36fb500f0c6aa66e1972d1f",
-};
-const headers2 = {
-  "x-access-token":
-    "coinranking15e62b930c47b275f6645ea9c85c13dc88f9947ac92049a3",
-};
-const headers3 = {
-  "x-access-token":
-    "coinrankingecab11b9d919a740887a9989e83b86b90d86c7236f5d56b5",
-};
 /* GET home page. */
-setInterval(() => {
+// setInterval(() => {
+//   axios
+//     .all([
+//       axios.get(
+//         "https://api.coinranking.com/v2/coins?limit=100&timePeriod=24h",
+//         {
+//           headers: {
+//             "x-access-token":
+//               "coinranking15e62b930c47b275f6645ea9c85c13dc88f9947ac92049a3",
+//           },
+//         }
+//       ),
+//       axios.get(
+//         "https://cryptopanic.com/api/v1/posts/?auth_token=43382aa9b285b15dc486b21e510501bf14c69b1e"
+//       ),
+//     ])
+//     .then(
+//       axios.spread((coin, news) => {
+//         console.log(coin);
+//         fs.writeFileSync("Data_list_coin.json", JSON.stringify(coin.data));
+//         fs.writeFileSync("Data_new.json", JSON.stringify(news.data));
+//       })
+//     );
+//   // .then((e) => {
+//   //   console.log("run");
+//   //   fs.writeFileSync("Data_list_coin.json", JSON.stringify(e.data));
+//   // })
+//   // .catch((err) => {
+//   //   console.log(err);
+//   // });
+// }, 2 * 60 * 60 * 1000);
+router.get("/", function (req, res, next) {
+  const { currency } = req.headers;
   axios
     .all([
       axios.get(
-        "https://api.coinranking.com/v2/coins?limit=100&timePeriod=24h",
+        "https://openapiv1.coinstats.app/coins?limit=100&currency=" + currency,
         {
           headers: {
-            "x-access-token":
-              "coinranking15e62b930c47b275f6645ea9c85c13dc88f9947ac92049a3",
+            "X-API-KEY": process.env.APIKEY_COINLIST,
           },
         }
       ),
-      axios.get(
-        "https://cryptopanic.com/api/v1/posts/?auth_token=43382aa9b285b15dc486b21e510501bf14c69b1e"
-      ),
+      axios.get("https://openapiv1.coinstats.app/news", {
+        headers: {
+          "X-API-KEY": process.env.APIKEY_COINLIST,
+        },
+      }),
     ])
     .then(
       axios.spread((coin, news) => {
-        fs.writeFileSync("Data_list_coin.json", JSON.stringify(coin.data));
-        fs.writeFileSync("Data_new.json", JSON.stringify(news.data));
+        res.status(200).json({ coinData: coin.data, newData: news.data });
       })
-    );
-  // .then((e) => {
-  //   console.log("run");
-  //   fs.writeFileSync("Data_list_coin.json", JSON.stringify(e.data));
-  // })
-  // .catch((err) => {
-  //   console.log(err);
-  // });
-}, 2 * 60 * 60 * 1000);
-router.get("/", function (req, res, next) {
-  fs.readFile("Data_list_coin.json", "utf8", function (err, data) {
-    if (err) throw err;
-    obj = JSON.parse(data);
-    res.json(obj);
-  });
+    )
+    .finally(() => {});
 });
+
+router.get("/search", function (req, res, next) {
+  const { currency, coin_string } = req.query;
+  axios
+    .get(
+      "https://openapiv1.coinstats.app/coins?limit=5&currency=" +
+        currency +
+        "&name=" +
+        coin_string,
+      {
+        headers: {
+          "X-API-KEY": process.env.APIKEY_SEARCH,
+        },
+      }
+    )
+    .then((coin) => {
+      res.status(200).json({ coinData: coin.data });
+    })
+    .catch((err) => {
+      console.log(err);
+    })
+    .finally(() => {});
+});
+router.get("/checkApi", function (req, res, next) {
+  res.status(200).json({ status: "Success" });
+});
+
 router.get("/news", function (req, res) {
   fs.readFile("Data_new.json", "utf8", function (err, data) {
     if (err) throw err;
@@ -63,7 +99,7 @@ router.get("/news", function (req, res) {
 router.get("/callspamblocker/news", function (req, res) {
   axios
     .get(
-      "https://newsapi.org/v2/everything?q=spam-phone&apiKey=3a2b177358fd4577b507c7923486b29f",
+      "https://newsapi.org/v2/everything?q=spa&apiKey=3a2b177358fd4577b507c7923486b29f",
       {
         headers: { authorization: "spambl0ckerAuthorization2k1rbyp0wer" },
       }
@@ -88,6 +124,26 @@ router.get("/callspamblocker/news", function (req, res) {
 //   //     }
 //   //   });
 // });
+
+router.get("/coin/detail", function (req, res) {
+  const { id } = req.query;
+
+  axios
+    .get(" https://openapiv1.coinstats.app/coins/" + id, {
+      headers: {
+        accpet: "application/json",
+        "X-API-KEY": process.env.APIKEY_SEARCH,
+      },
+    })
+    .then((value) => {
+      const { data } = value;
+      res.statusCode(200).json(data);
+    })
+    .catch((err) => {
+      res.status(404).json({ err: "Coin not Found" });
+    });
+});
+
 router.get("/coin/:id", function (req, res) {
   const id = req.params.id;
   const timestamp = [];
