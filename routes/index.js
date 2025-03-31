@@ -126,21 +126,19 @@ router.get("/callspamblocker/news", function (req, res) {
 // });
 
 router.get("/coin/detail", function (req, res) {
-  const { id } = req.query;
-
+  const { id } = req.headers;
   axios
-    .get(" https://openapiv1.coinstats.app/coins/" + id, {
+    .get("https://openapiv1.coinstats.app/coins/" + id, {
       headers: {
-        accpet: "application/json",
         "X-API-KEY": process.env.APIKEY_SEARCH,
       },
     })
     .then((value) => {
       const { data } = value;
-      res.statusCode(200).json(data);
+      res.status(200).json(data);
     })
     .catch((err) => {
-      res.status(404).json({ err: "Coin not Found" });
+      res.status(404).json({ err: err });
     });
 });
 
