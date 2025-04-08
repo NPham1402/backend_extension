@@ -63,7 +63,7 @@ router.get("/", function (req, res, next) {
 });
 
 router.get("/search", function (req, res, next) {
-  const { currency, coin_string } = req.query;
+  const { currency, coin_string } = req.headers;
   axios
     .get(
       "https://openapiv1.coinstats.app/coins?limit=5&currency=" +
@@ -88,12 +88,43 @@ router.get("/checkApi", function (req, res, next) {
   res.status(200).json({ status: "Success" });
 });
 
-router.get("/news", function (req, res) {
-  fs.readFile("Data_new.json", "utf8", function (err, data) {
-    if (err) throw err;
-    obj = JSON.parse(data);
-    res.json(obj);
-  });
+router.get("/news/source", function (req, res) {
+  axios
+    .get("https://openapiv1.coinstats.app/news/sources", {
+      headers: {
+        "X-API-KEY": process.env.APIKEY_SEARCH,
+      },
+    })
+    .then((data) => {
+      res.json(data.data);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(404).json({ err: "err" });
+    });
+});
+
+router.get("/news/types", function (req, res) {
+  const { types } = req.header;
+  let tempVariableTypes = "";
+  if (!types) {
+    tempVariableTypes = "trending";
+  } else {
+    tempVariableTypes = types;
+  }
+  axios
+    .get("https://openapiv1.coinstats.app/news/type/" + tempVariableTypes, {
+      headers: {
+        "X-API-KEY": process.env.APIKEY_SEARCH,
+      },
+    })
+    .then((data) => {
+      res.json(data.data);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(404).json({ err: err });
+    });
 });
 
 router.get("/callspamblocker/news", function (req, res) {
@@ -130,7 +161,63 @@ router.get("/coin/detail", function (req, res) {
   axios
     .get("https://openapiv1.coinstats.app/coins/" + id, {
       headers: {
-        "X-API-KEY": process.env.APIKEY_SEARCH,
+        "X-API-KEY": process.env.APIKEY_COINLIST,
+      },
+    })
+    .then((value) => {
+      const { data } = value;
+      res.status(200).json(data);
+    })
+    .catch((err) => {
+      res.status(404).json({ err: err });
+    });
+});
+
+router.get("/coin/chart", function (req, res) {
+  const { id, period } = req.headers;
+  const periodsTemp = !period ? "all" : period;
+  axios
+    .get(
+      "https://openapiv1.coinstats.app/coins/" +
+        id +
+        "/charts?period=" +
+        periodsTemp,
+      {
+        headers: {
+          "X-API-KEY": process.env.APIKEY_SEARCH,
+        },
+      }
+    )
+    .then((value) => {
+      const { data } = value;
+      res.status(200).json(data);
+    })
+    .catch((err) => {
+      res.status(404).json({ err: err });
+    });
+});
+
+router.get("/resgiter", function (req, res) {
+  axios
+    .get("https://openapiv1.coinstats.app/fiats", {
+      headers: {
+        "X-API-KEY": process.env.APIKEY_COINLIST,
+      },
+    })
+    .then((value) => {
+      const { data } = value;
+      res.status(200).json(data);
+    })
+    .catch((err) => {
+      res.status(404).json({ err: err });
+    });
+});
+
+router.get("/currency/infor", function (req, res) {
+  axios
+    .get("https://openapiv1.coinstats.app/fiats", {
+      headers: {
+        "X-API-KEY": process.env.APIKEY_COINLIST,
       },
     })
     .then((value) => {
