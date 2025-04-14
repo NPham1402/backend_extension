@@ -38,27 +38,20 @@ var router = express.Router();
 // }, 2 * 60 * 60 * 1000);
 router.get("/", function (req, res, next) {
   const { currency } = req.headers;
+
   axios
-    .all([
-      axios.get(
-        "https://openapiv1.coinstats.app/coins?limit=100&currency=" + currency,
-        {
-          headers: {
-            "X-API-KEY": process.env.APIKEY_COINLIST,
-          },
-        }
-      ),
-      axios.get("https://openapiv1.coinstats.app/news", {
+    .get(
+      "https://openapiv1.coinstats.app/coins?limit=100&currency=" + currency,
+      {
         headers: {
           "X-API-KEY": process.env.APIKEY_COINLIST,
         },
-      }),
-    ])
-    .then(
-      axios.spread((coin, news) => {
-        res.status(200).json({ coinData: coin.data, newData: news.data });
-      })
+      }
     )
+
+    .then((respone) => {
+      res.status(200).json({ coinData: respone.data });
+    })
     .finally(() => {});
 });
 
@@ -104,28 +97,7 @@ router.get("/news/source", function (req, res) {
     });
 });
 
-router.get("/news/types", function (req, res) {
-  const { types } = req.header;
-  let tempVariableTypes = "";
-  if (!types) {
-    tempVariableTypes = "trending";
-  } else {
-    tempVariableTypes = types;
-  }
-  axios
-    .get("https://openapiv1.coinstats.app/news/type/" + tempVariableTypes, {
-      headers: {
-        "X-API-KEY": process.env.APIKEY_SEARCH,
-      },
-    })
-    .then((data) => {
-      res.json(data.data);
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(404).json({ err: err });
-    });
-});
+router.get("/news/types", function (req, res) {});
 
 router.get("/callspamblocker/news", function (req, res) {
   axios
@@ -188,22 +160,6 @@ router.get("/coin/chart", function (req, res) {
         },
       }
     )
-    .then((value) => {
-      const { data } = value;
-      res.status(200).json(data);
-    })
-    .catch((err) => {
-      res.status(404).json({ err: err });
-    });
-});
-
-router.get("/resgiter", function (req, res) {
-  axios
-    .get("https://openapiv1.coinstats.app/fiats", {
-      headers: {
-        "X-API-KEY": process.env.APIKEY_COINLIST,
-      },
-    })
     .then((value) => {
       const { data } = value;
       res.status(200).json(data);
